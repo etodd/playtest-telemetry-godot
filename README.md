@@ -2,6 +2,8 @@
 
 A Godot plugin for collecting playtest telemetry and submitting it to a [server](https://github.com/etodd/playtest-telemetry-server).
 
+NOTE: this plugin is designed only for playtesting, not production.
+
 1. Copy the PlaytestTelemetry directory into your `addons` folder.
 
 2. Under Project -> Project Settings -> Plugins, enable the PlaytestTelemetry plugin.
