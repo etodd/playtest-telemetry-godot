@@ -35,7 +35,7 @@ class PropertyRef:
 var property_refs: Array[PropertyRef]
 
 func _ready() -> void:
-	if false and not OS.has_feature("telemetry"):
+	if not OS.has_feature("telemetry"):
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
 	
@@ -156,6 +156,9 @@ func _notification(what) -> void:
 		return
 	if what != NOTIFICATION_WM_CLOSE_REQUEST:
 		return
+	
+	var modal: PackedScene = load("res://addons/PlaytestTelemetry/Modal.tscn")
+	add_child(modal.instantiate())
 	
 	# user is quitting, end the session
 	session["end"] = unix_time
