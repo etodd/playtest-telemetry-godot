@@ -1,4 +1,3 @@
-@tool
 extends Node
 
 var game_time: float = 0.0
@@ -44,7 +43,7 @@ func _ready() -> void:
 	record_properties(self, ["frames_per_second"])
 
 func record_properties(node: Node, properties: Array[StringName], time_resolution: float = 1.0) -> void:
-	if not is_processing():
+	if process_mode == Node.PROCESS_MODE_DISABLED:
 		return
 	for property in node.get_property_list():
 		if not properties.has(property["name"]):
@@ -70,7 +69,7 @@ func record_properties(node: Node, properties: Array[StringName], time_resolutio
 		}
 
 func record_event(node: Node, event: StringName) -> void:
-	if not is_processing():
+	if process_mode == Node.PROCESS_MODE_DISABLED:
 		return
 	var nodeTracks: Dictionary = _get_node_tracks(node)
 	var track: Dictionary
@@ -152,7 +151,7 @@ func _get_node_tracks(node: Node) -> Dictionary:
 	return tracks
 
 func _notification(what) -> void:
-	if not is_processing():
+	if process_mode == Node.PROCESS_MODE_DISABLED:
 		return
 	if what != NOTIFICATION_WM_CLOSE_REQUEST:
 		return

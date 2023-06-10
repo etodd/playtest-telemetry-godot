@@ -1,0 +1,75 @@
+[gd_scene load_steps=4 format=3 uid="uid://sgfnmakr42f8"]
+
+[ext_resource type="Script" path="res://addons/PlaytestTelemetry/MainScreen.gd" id="1_pbvwv"]
+[ext_resource type="Texture2D" uid="uid://2mel2jknfoim" path="res://addons/PlaytestTelemetry/Play.svg" id="2_mtei8"]
+[ext_resource type="Script" path="res://addons/PlaytestTelemetry/Viewport3D.gd" id="3_yati2"]
+
+[node name="MainScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1_pbvwv")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(300, 2.08165e-12)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="PlayButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+icon = ExtResource("2_mtei8")
+
+[node name="HSlider" type="HSlider" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="LoadButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Load..."
+
+[node name="LoadFileDialog" type="FileDialog" parent="HBoxContainer/VBoxContainer"]
+title = "Open File(s)"
+size = Vector2i(650, 448)
+ok_button_text = "Open"
+file_mode = 1
+access = 2
+filters = PackedStringArray("*.json.gz ; gzipped JSON files")
+
+[node name="ItemList" type="ItemList" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+select_mode = 1
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
+script = ExtResource("3_yati2")
+
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(2, 2)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="HBoxContainer/SubViewportContainer/SubViewport"]
+
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/HBoxContainer/LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="files_selected" from="HBoxContainer/VBoxContainer/LoadFileDialog" to="." method="_on_load_file_dialog_files_selected"]
+[connection signal="multi_selected" from="HBoxContainer/VBoxContainer/ItemList" to="." method="_on_item_list_multi_selected"]
