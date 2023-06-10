@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://sgfnmakr42f8"]
 
-[ext_resource type="Script" path="res://addons/PlaytestTelemetry/MainScreen.gd" id="1_pbvwv"]
-[ext_resource type="Texture2D" uid="uid://2mel2jknfoim" path="res://addons/PlaytestTelemetry/Play.svg" id="2_mtei8"]
-[ext_resource type="Script" path="res://addons/PlaytestTelemetry/Viewport3D.gd" id="3_yati2"]
+[ext_resource type="Script" path="res://addons/PlaytestTelemetry/MainScreen.gd" id="1_e1eqk"]
+[ext_resource type="Texture2D" uid="uid://2mel2jknfoim" path="res://addons/PlaytestTelemetry/Play.svg" id="2_les0k"]
+[ext_resource type="Script" path="res://addons/PlaytestTelemetry/Viewport3D.gd" id="3_sf2hh"]
 
 [node name="MainScreen" type="Control"]
 layout_mode = 3
@@ -12,7 +12,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
-script = ExtResource("1_pbvwv")
+script = ExtResource("1_e1eqk")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -33,7 +33,7 @@ size_flags_vertical = 0
 
 [node name="PlayButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("2_mtei8")
+icon = ExtResource("2_les0k")
 
 [node name="HSlider" type="HSlider" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -61,7 +61,7 @@ select_mode = 1
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
-script = ExtResource("3_yati2")
+script = ExtResource("3_sf2hh")
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainer"]
 handle_input_locally = false
