@@ -12,7 +12,17 @@ NOTE: this plugin is designed only for playtesting, not production.
 
 3. Under Project -> Project Settings -> General, enable "Advanced settings", search for "Playtest Telemetry", and enter the URL and API key for your telemetry server. Make sure to specify a version number too. It's important to distinguish each version of your game that you send out to playtesters.
 
-4. Anywhere in your code where you are currently doing this:
+4. When you want to record a property, add something like this to your code:
+   ```
+   func _ready():
+       PlaytestTelemetry.record_properties(self, ["global_transform", "health"])
+   ```
+   To record an event do this:
+   ```
+   PlaytestTelemetry.record_event(self, "weapon_fired")
+   ```
+
+6. Anywhere in your code where you are currently doing this:
 	```
 	get_tree().quit()
 	```
@@ -21,6 +31,6 @@ NOTE: this plugin is designed only for playtesting, not production.
 	get_tree().get_root().propagate_notification(NOTIFICATION_WM_CLOSE_REQUEST)
 	```
 
-5. Under Project -> Export..., in the Features tab of each preset, add `telemetry` to the Custom features field.
+7. Under Project -> Export..., in the Features tab of each preset, add `telemetry` to the Custom features field.
 
-6. Export your game and run it, then open up the domain name of your telemetry server in a web browser, and enjoy!
+8. Export your game and run it, then open up the domain name of your telemetry server in a web browser, and enjoy!
