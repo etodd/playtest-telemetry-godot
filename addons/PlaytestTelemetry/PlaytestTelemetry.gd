@@ -38,7 +38,7 @@ class PropertyRef:
 var property_refs: Array[PropertyRef]
 
 func _ready() -> void:
-	if false:#not OS.has_feature("telemetry"):
+	if not OS.has_feature("telemetry"):
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
 	
