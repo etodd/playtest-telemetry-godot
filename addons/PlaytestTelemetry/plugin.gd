@@ -18,11 +18,12 @@ func _enter_tree():
 		push_error("Encountered error %d when saving project settings." % error)
 	
 	main_screen = main_screen_scene.instantiate()
+	main_screen.process_mode = Node.PROCESS_MODE_ALWAYS # MainScreen is ordinarily disabled while it is being edited
+	
 	# Add the main panel to the editor's main viewport.
 	get_editor_interface().get_editor_main_screen().add_child(main_screen)
 	# Hide the main panel. Very much required.
 	_make_visible(false)
-	connect("scene_changed", _on_scene_changed)
 
 func _exit_tree():
 	remove_autoload_singleton(AUTOLOAD_NAME)
@@ -57,7 +58,3 @@ func _get_plugin_name() -> String:
 	
 func _get_plugin_icon() -> Texture2D:
 	return get_editor_interface().get_base_control().get_theme_icon("WorldEnvironment", "EditorIcons")
-
-func _on_scene_changed(scene: Node) -> void:
-	if scene is PlaytestTelemetryMainScreen:
-		scene.process_mode = Node.PROCESS_MODE_DISABLED
