@@ -22,6 +22,7 @@ func _enter_tree():
 	get_editor_interface().get_editor_main_screen().add_child(main_screen)
 	# Hide the main panel. Very much required.
 	_make_visible(false)
+	connect("scene_changed", _on_scene_changed)
 
 func _exit_tree():
 	remove_autoload_singleton(AUTOLOAD_NAME)
@@ -48,9 +49,15 @@ func _has_main_screen() -> bool:
 
 func _make_visible(visible: bool) -> void:
 	main_screen.visible = visible
+	if visible:
+		main_screen._on_shown()
 
 func _get_plugin_name() -> String:
 	return "Telemetry"
 	
 func _get_plugin_icon() -> Texture2D:
 	return get_editor_interface().get_base_control().get_theme_icon("WorldEnvironment", "EditorIcons")
+
+func _on_scene_changed(scene: Node) -> void:
+	if scene is PlaytestTelemetryMainScreen:
+		scene.process_mode = Node.PROCESS_MODE_DISABLED

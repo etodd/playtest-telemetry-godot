@@ -21,7 +21,11 @@ var game_time: float = 0.0
 	"nodes": {},
 }
 @onready var last_paused: bool = get_tree().paused
-@onready var frames_per_second: float = Engine.get_frames_per_second()
+
+const FRAME_TIME_INTERVAL: float = 1.0 # seconds
+var frame_time_accumulator: float = 0.0 # seconds
+var frame_time_timer: float = 0.0 # seconds
+var frame_time: float = 0.0 # seconds
 
 class PropertyRef:
 	var node_ref: WeakRef
@@ -34,15 +38,15 @@ class PropertyRef:
 var property_refs: Array[PropertyRef]
 
 func _ready() -> void:
-	if not OS.has_feature("telemetry"):
+	if false:#not OS.has_feature("telemetry"):
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
 	
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().set_auto_accept_quit(false)
-	record_properties(self, ["frames_per_second"])
+	record_properties(self, ["frame_time"])
 
-func record_properties(node: Node, properties: Array[StringName], time_resolution: float = 1.0) -> void:
+func record_properties(node: Node, properties: Array[StringName], time_resolution: float = 0.25) -> void:
 	if process_mode == Node.PROCESS_MODE_DISABLED:
 		return
 	for property in node.get_property_list():
@@ -56,10 +60,8 @@ func record_properties(node: Node, properties: Array[StringName], time_resolutio
 		ref.type = property["type"]
 		ref.name = property["name"]
 		ref.data = data
-		ref.last_value = node.get(ref.name)
 		ref.last_changed_unix_time = unix_time
 		ref.time_resolution = time_resolution
-		data.append([game_time, unix_time, _serialize_property(ref.type, ref.last_value)])
 		property_refs.append(ref)
 		
 		var nodeTracks: Dictionary = _get_node_tracks(node)
@@ -86,7 +88,12 @@ func record_event(node: Node, event: StringName) -> void:
 func _process(delta: float) -> void:
 	last_unix_time = unix_time
 	unix_time = Time.get_unix_time_from_system()
-	frames_per_second = Engine.get_frames_per_second()
+	frame_time_accumulator = max(frame_time_accumulator, delta)
+	frame_time_timer += delta
+	if frame_time_timer > FRAME_TIME_INTERVAL:
+		frame_time_timer -= FRAME_TIME_INTERVAL
+		frame_time = frame_time_accumulator
+		frame_time_accumulator = 0.0
 	
 	if get_tree().paused:
 		if not last_paused:
@@ -124,7 +131,7 @@ func _process(delta: float) -> void:
 func _serialize_property(type: int, value: Variant) -> Variant:
 	match type:
 		# primitives
-		TYPE_FLOAT, TYPE_INT, TYPE_BOOL, TYPE_STRING, TYPE_STRING_NAME, TYPE_NODE_PATH, TYPE_RID:
+		TYPE_FLOAT, TYPE_INT, TYPE_BOOL, TYPE_STRING, TYPE_STRING_NAME, TYPE_NODE_PATH:
 			return value
 		TYPE_VECTOR2, TYPE_VECTOR2I:
 			return [value.x, value.y]
@@ -132,11 +139,14 @@ func _serialize_property(type: int, value: Variant) -> Variant:
 			return [value.x, value.y, value.z]
 		TYPE_VECTOR4, TYPE_VECTOR4I, TYPE_QUATERNION:
 			return [value.x, value.y, value.z, value.w]
+		TYPE_BASIS:
+			var q: Quaternion = value.get_rotation_quaternion()
+			return [q.x, q.y, q.z, q.w]
 		TYPE_TRANSFORM2D:
-			return [value.origin.x, value.origin.y, value.get_rotation()]
+			return [value.get_rotation(), value.origin.x, value.origin.y]
 		TYPE_TRANSFORM3D:
 			var q: Quaternion = value.basis.get_rotation_quaternion()
-			return [value.origin.x, value.origin.y, value.origin.z, q.x, q.y, q.z, q.w]
+			return [q.x, q.y, q.z, q.w, value.origin.x, value.origin.y, value.origin.z]
 		_:
 			push_error("Unsupported telemetry property type", type)
 			return null

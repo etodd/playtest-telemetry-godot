@@ -1,8 +1,29 @@
-[gd_scene load_steps=4 format=3 uid="uid://sgfnmakr42f8"]
+[gd_scene load_steps=7 format=3 uid="uid://sgfnmakr42f8"]
 
-[ext_resource type="Script" path="res://addons/PlaytestTelemetry/MainScreen.gd" id="1_e1eqk"]
-[ext_resource type="Texture2D" uid="uid://2mel2jknfoim" path="res://addons/PlaytestTelemetry/Play.svg" id="2_les0k"]
-[ext_resource type="Script" path="res://addons/PlaytestTelemetry/Viewport3D.gd" id="3_sf2hh"]
+[ext_resource type="Script" path="res://addons/PlaytestTelemetry/MainScreen.gd" id="1_puutv"]
+[ext_resource type="Texture2D" uid="uid://2mel2jknfoim" path="res://addons/PlaytestTelemetry/Play.svg" id="2_3i3hy"]
+[ext_resource type="Script" path="res://addons/PlaytestTelemetry/Viewport.gd" id="3_i6qm6"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k1j1c"]
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_5d2tq"]
+material = SubResource("StandardMaterial3D_k1j1c")
+top_radius = 0.0
+bottom_radius = 0.25
+height = 1.0
+radial_segments = 32
+rings = 1
+cap_top = false
+
+[sub_resource type="MultiMesh" id="MultiMesh_i455u"]
+transform_format = 1
+use_colors = true
+instance_count = 6
+visible_instance_count = 0
+mesh = SubResource("CylinderMesh_5d2tq")
+buffer = PackedFloat32Array(-0.999944, -0.0105547, -0.000760804, 0.207481, -2.91038e-11, -0.0718955, 0.997412, -3.51699, -0.0105821, 0.997356, 0.0718915, 49.0541, 0.792157, 0.87451, 0.0470588, 1, -0.938868, 0.339882, 0.0548395, -1.01651, 0.000443904, -0.158094, 0.987424, -3.47243, 0.344277, 0.927085, 0.148278, 8.54318, 0.647059, 0.0705882, 0.368627, 1, -0.999918, 0.0127433, 0.00149008, 0.463563, 5.82077e-11, -0.116139, 0.993233, -3.2784, 0.0128301, 0.993151, 0.11613, 50.746, 0.517647, 0.788235, 0.815686, 1, 0.959824, 0.201278, 0.195514, -2.73152, -0.0658996, -0.515583, 0.854302, -4.26372, 0.272756, -0.832863, -0.481604, 51.8582, 0.490196, 0.847059, 0.101961, 1, -0.241396, 0.968155, 0.0663573, 18.9804, 0.00284669, -0.0676728, 0.997703, 0.742141, 0.970423, 0.241031, 0.0135799, 78.1585, 0.294118, 0.388235, 0.627451, 1, -0.299452, 0.900283, 0.315942, 19.4534, -0.006925, -0.33318, 0.942838, 4.46375, 0.954086, 0.280147, 0.106006, 76.2973, 0.329412, 0.929412, 0.639216, 1)
 
 [node name="MainScreen" type="Control"]
 layout_mode = 3
@@ -12,9 +33,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
-script = ExtResource("1_e1eqk")
+script = ExtResource("1_puutv")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,29 +43,35 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer"]
 custom_minimum_size = Vector2(300, 2.08165e-12)
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="PlayButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="PlayButton" type="Button" parent="HSplitContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("2_les0k")
+focus_next = NodePath("../HSlider")
+icon = ExtResource("2_3i3hy")
 
-[node name="HSlider" type="HSlider" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="HSlider" type="HSlider" parent="HSplitContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+focus_previous = NodePath("../PlayButton")
+step = 2.08165e-12
+editable = false
 
-[node name="LoadButton" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+[node name="LoadButton" type="Button" parent="HSplitContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
+focus_previous = NodePath("../HSlider")
 text = "Load..."
 
-[node name="LoadFileDialog" type="FileDialog" parent="HBoxContainer/VBoxContainer"]
+[node name="LoadFileDialog" type="FileDialog" parent="HSplitContainer/VBoxContainer"]
 title = "Open File(s)"
 size = Vector2i(650, 448)
 ok_button_text = "Open"
@@ -52,24 +79,36 @@ file_mode = 1
 access = 2
 filters = PackedStringArray("*.json.gz ; gzipped JSON files")
 
-[node name="ItemList" type="ItemList" parent="HBoxContainer/VBoxContainer"]
+[node name="SessionList" type="ItemList" parent="HSplitContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 select_mode = 1
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="HBoxContainer"]
+[node name="PropertyList" type="ItemList" parent="HSplitContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+select_mode = 1
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
-script = ExtResource("3_sf2hh")
+script = ExtResource("3_i6qm6")
 
-[node name="SubViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="HSplitContainer/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(2, 2)
+size = Vector2i(1274, 1080)
 render_target_update_mode = 4
 
-[node name="Camera3D" type="Camera3D" parent="HBoxContainer/SubViewportContainer/SubViewport"]
+[node name="Camera3D" type="Camera3D" parent="HSplitContainer/SubViewportContainer/SubViewport"]
 
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/HBoxContainer/LoadButton" to="." method="_on_load_button_pressed"]
-[connection signal="files_selected" from="HBoxContainer/VBoxContainer/LoadFileDialog" to="." method="_on_load_file_dialog_files_selected"]
-[connection signal="multi_selected" from="HBoxContainer/VBoxContainer/ItemList" to="." method="_on_item_list_multi_selected"]
+[node name="Transform3DVisualization" type="MultiMeshInstance3D" parent="HSplitContainer/SubViewportContainer/SubViewport"]
+cast_shadow = 0
+gi_mode = 0
+multimesh = SubResource("MultiMesh_i455u")
+
+[connection signal="pressed" from="HSplitContainer/VBoxContainer/HBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="HSplitContainer/VBoxContainer/HBoxContainer/LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="files_selected" from="HSplitContainer/VBoxContainer/LoadFileDialog" to="." method="_on_load_file_dialog_files_selected"]
+[connection signal="multi_selected" from="HSplitContainer/VBoxContainer/SessionList" to="." method="_on_session_list_multi_selected"]
+[connection signal="multi_selected" from="HSplitContainer/VBoxContainer/PropertyList" to="." method="_on_property_list_multi_selected"]
