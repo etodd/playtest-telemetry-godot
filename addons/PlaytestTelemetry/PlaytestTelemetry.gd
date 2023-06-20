@@ -38,12 +38,12 @@ class PropertyRef:
 var property_refs: Array[PropertyRef]
 
 func _ready() -> void:
+	get_tree().set_auto_accept_quit(false)
 	if not OS.has_feature("telemetry"):
 		process_mode = Node.PROCESS_MODE_DISABLED
 		return
 	
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	get_tree().set_auto_accept_quit(false)
 	record_properties(self, ["frame_time"])
 
 func record_properties(node: Node, properties: Array[StringName], time_resolution: float = 0.25) -> void:
@@ -161,9 +161,10 @@ func _get_node_tracks(node: Node) -> Dictionary:
 	return tracks
 
 func _notification(what) -> void:
-	if process_mode == Node.PROCESS_MODE_DISABLED:
-		return
 	if what != NOTIFICATION_WM_CLOSE_REQUEST:
+		return
+	if process_mode == Node.PROCESS_MODE_DISABLED:
+		get_tree().quit()
 		return
 	
 	var modal: PackedScene = load("res://addons/PlaytestTelemetry/Modal.tscn")
