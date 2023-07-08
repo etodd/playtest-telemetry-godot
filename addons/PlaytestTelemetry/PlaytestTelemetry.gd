@@ -26,6 +26,7 @@ const FRAME_TIME_INTERVAL: float = 1.0 # seconds
 var frame_time_accumulator: float = 0.0 # seconds
 var frame_time_timer: float = 0.0 # seconds
 var frame_time: float = 0.0 # seconds
+var quit_request: bool = false
 
 class PropertyRef:
 	var node_ref: WeakRef
@@ -60,6 +61,9 @@ func record_properties(node: Node, properties: Array[StringName], time_resolutio
 		ref.type = property["type"]
 		ref.name = property["name"]
 		ref.data = data
+		var value: Variant = node.get(ref.name)
+		ref.data.append([game_time, unix_time, _serialize_property(ref.type, value)])
+		ref.last_value = value
 		ref.last_changed_unix_time = unix_time
 		ref.time_resolution = time_resolution
 		property_refs.append(ref)
@@ -86,6 +90,36 @@ func record_event(node: Node, event: StringName) -> void:
 	track["data"].append([game_time, unix_time, _serialize_property(TYPE_STRING_NAME, event)])
 
 func _process(delta: float) -> void:
+	if quit_request:
+		quit_request = false
+		print("Uploading telemetry")
+		
+		var modal: PackedScene = load("res://addons/PlaytestTelemetry/Modal.tscn")
+		add_child(modal.instantiate())
+		
+		# user is quitting, end the session
+		session["end"] = unix_time
+		session["in_game_duration"] = game_time
+		
+		# upload the session
+		var http: HTTPRequest = HTTPRequest.new()
+		add_child(http)
+		var body: PackedByteArray = JSON.stringify([session], "", true, true).to_utf8_buffer().compress(FileAccess.COMPRESSION_GZIP)
+		var error: Error = http.request_raw(
+			ProjectSettings.get_setting("playtest_telemetry/url", "http://localhost:8000/upload"),
+			[
+				"Content-Type: application/json",
+				"Content-Encoding: gzip",
+				"Authorization: Bearer %s" % ProjectSettings.get_setting("playtest_telemetry/api_key", "testkey"),
+			],
+			HTTPClient.METHOD_POST,
+			body,
+		)
+		if error != OK:
+			push_error("Error uploading telemetry: %d" % error)
+		http.request_completed.connect(_request_completed)
+		return
+	
 	last_unix_time = unix_time
 	unix_time = Time.get_unix_time_from_system()
 	frame_time_accumulator = max(frame_time_accumulator, delta)
@@ -128,6 +162,10 @@ func _process(delta: float) -> void:
 		ref.last_value = value
 		ref.last_changed_unix_time = unix_time
 
+func _request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	print("Telemetry uploaded (", result, " ", response_code, ")")
+	get_tree().quit()
+
 func _serialize_property(type: int, value: Variant) -> Variant:
 	match type:
 		# primitives
@@ -166,33 +204,7 @@ func _notification(what) -> void:
 	if process_mode == Node.PROCESS_MODE_DISABLED:
 		get_tree().quit()
 		return
-	
-	var modal: PackedScene = load("res://addons/PlaytestTelemetry/Modal.tscn")
-	add_child(modal.instantiate())
-	
-	# user is quitting, end the session
-	session["end"] = unix_time
-	session["in_game_duration"] = game_time
-	
-	# upload the session
-	var http: HTTPRequest = HTTPRequest.new()
-	add_child(http)
-	var body: PackedByteArray = JSON.stringify([session], "", true, true).to_utf8_buffer().compress(FileAccess.COMPRESSION_GZIP)
-	var error: Error = http.request_raw(
-		ProjectSettings.get_setting("playtest_telemetry/url", "http://localhost:8000/upload"),
-		[
-			"Content-Type: application/json",
-			"Content-Encoding: gzip",
-			"Authorization: Bearer %s" % ProjectSettings.get_setting("playtest_telemetry/api_key", "testkey"),
-		],
-		HTTPClient.METHOD_POST,
-		body,
-	)
-	if error != OK:
-		push_error("Error uploading telemetry: %d" % error)
-	await http.request_completed
-	print("Telemetry uploaded")
-	get_tree().quit()
+	quit_request = true
 
 const ascii_letters_and_digits: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 func _random_string(length: int) -> String:
