@@ -16,7 +16,7 @@ var game_time: float = 0.0
 		"window_size": [DisplayServer.window_get_size().x, DisplayServer.window_get_size().y],
 	},
 	"id": _random_string(12),
-	"version": ProjectSettings.get_setting("playtest_telemetry/version", "1.0.0"),
+	"version": ProjectSettings.get_setting("application/config/version", "1.0.0"),
 	"start": unix_time,
 	"nodes": {},
 }

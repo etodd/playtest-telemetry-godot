@@ -11,7 +11,6 @@ func _enter_tree():
 	add_autoload_singleton(AUTOLOAD_NAME, "res://addons/PlaytestTelemetry/PlaytestTelemetry.gd")
 	_add_custom_project_setting("playtest_telemetry/url", "http://localhost:8000/upload", TYPE_STRING, PROPERTY_HINT_PLACEHOLDER_TEXT, "https://example.com/upload")
 	_add_custom_project_setting("playtest_telemetry/api_key", "testkey", TYPE_STRING, PROPERTY_HINT_PLACEHOLDER_TEXT, "ABCD1234")
-	_add_custom_project_setting("playtest_telemetry/version", "1.0.0", TYPE_STRING, PROPERTY_HINT_PLACEHOLDER_TEXT, "1.0.0")
 
 	var error: int = ProjectSettings.save()
 	if error:

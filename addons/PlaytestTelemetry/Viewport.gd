@@ -33,8 +33,8 @@ func _gui_input(event: InputEvent) -> void:
 			accept_event()
 	elif event is InputEventMouseMotion:
 		if looking:
-			camera3D.rotation.y -= event.relative.x * MOUSE_LOOK_SPEED
-			camera3D.rotation.x -= event.relative.y * MOUSE_LOOK_SPEED
+			camera3D.rotation.y -= event.relative.x * MOUSE_LOOK_SPEED * get_tree().root.content_scale_factor
+			camera3D.rotation.x -= event.relative.y * MOUSE_LOOK_SPEED * get_tree().root.content_scale_factor
 			camera3D.rotation.x = clamp(camera3D.rotation.x, PI * -0.5, PI * 0.5)
 			accept_event()
 
